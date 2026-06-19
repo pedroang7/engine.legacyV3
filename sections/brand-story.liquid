@@ -1,0 +1,65 @@
+<section id="s-story" class="story-wrap" aria-label="Brand Story">
+  <div class="story-img" aria-hidden="true">
+    {%- if section.settings.image != blank -%}
+      <img src="{{ section.settings.image | image_url: width: 2000 }}" alt="">
+    {%- else -%}
+      <div class="photo-slot"></div>
+    {%- endif -%}
+  </div>
+
+  <div class="story-container">
+    <div class="story-content sr">
+      <p class="label" style="margin-bottom:24px">The Engine Legacy Story</p>
+      <h2 class="h-section">{{ section.settings.title }}</h2>
+      <div class="body-text story-body">{{ section.settings.description | newline_to_br }}</div>
+    </div>
+  </div>
+</section>
+
+<style>
+.story-wrap {
+  position: relative;
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  background: var(--graphite);
+  border-top: 1px solid var(--border);
+  overflow: hidden;
+}
+.story-img { position: absolute; inset: 0; z-index: 1; opacity: .35; }
+.story-img::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, var(--graphite) 0%, rgba(15,17,19,.6) 50%, var(--graphite) 100%);
+}
+.story-container {
+  max-width: var(--mw);
+  margin: 0 auto;
+  width: 100%;
+  padding: var(--section-py) var(--px);
+  position: relative;
+  z-index: 2;
+}
+.story-content { max-width: 620px; }
+.story-content h2 { margin-bottom: 36px; }
+.story-body { font-size: 16px; }
+
+@media (max-width: 768px) { .story-img { opacity: .18; } }
+</style>
+
+{% schema %}
+{
+  "name": "Brand Story",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "Background image" },
+    { "type": "text", "id": "title", "label": "Title", "default": "BUILT FOR PEOPLE OBSESSED WITH MACHINES." },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Story text",
+      "default": "Engine Legacy is not just a brand; it's a testament to the pursuit of mechanical perfection. We exist for those who understand that true luxury isn't found in excess, but in the precision of the movement and the integrity of the design. We don't just build timepieces; we engineer legacy."
+    }
+  ],
+  "presets": [{ "name": "Brand Story", "category": "Engine Legacy" }]
+}
+{% endschema %}

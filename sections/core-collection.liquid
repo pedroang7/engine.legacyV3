@@ -1,0 +1,102 @@
+<section id="s-collection" class="core-wrap" aria-label="Core Collection">
+  <div class="core-header sr">
+    <p class="label" style="margin-bottom:16px">The Foundation</p>
+    <h2 class="h-section">{{ section.settings.title }}</h2>
+    {%- if section.settings.subtitle != blank -%}
+      <p class="body-text core-subtitle">{{ section.settings.subtitle }}</p>
+    {%- endif -%}
+  </div>
+
+  <div class="core-grid">
+    {%- for block in section.blocks -%}
+      {%- assign p = block.settings.product -%}
+      <div class="pcard sr d{{ forloop.index }}" {{ block.shopify_attributes }}>
+        <a href="{{ p.url | default: '#' }}" class="pcard-link">
+          <div class="pcard-img">
+            {%- if p != blank and p.featured_image != blank -%}
+              <img src="{{ p.featured_image | image_url: width: 800 }}" alt="{{ p.title }}">
+            {%- else -%}
+              <div class="photo-slot"></div>
+            {%- endif -%}
+          </div>
+          <div class="pcard-info">
+            <h3 class="pcard-title">{{ p.title | default: 'Watch Model' }}</h3>
+            {%- if p != blank -%}
+              <p class="pcard-price">{{ p.price | money_without_trailing_zeros }}</p>
+            {%- endif -%}
+          </div>
+        </a>
+      </div>
+    {%- endfor -%}
+  </div>
+</section>
+
+<style>
+.core-wrap { padding: var(--section-py) var(--px); max-width: var(--mw); margin: 0 auto; }
+.core-header { margin-bottom: 72px; text-align: center; }
+.core-header h2 { margin-bottom: 18px; }
+.core-subtitle { max-width: 40ch; margin: 0 auto; }
+
+.core-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+}
+
+.pcard { position: relative; overflow: hidden; background: var(--graphite-2); border: 1px solid var(--border); transition: border-color .4s var(--ease); }
+.pcard:hover { border-color: var(--border-md); }
+.pcard-link { display: block; height: 100%; }
+.pcard-img { aspect-ratio: 4/5; overflow: hidden; }
+.pcard-img img { transition: transform .8s var(--ease); }
+.pcard:hover .pcard-img img { transform: scale(1.06); }
+
+.pcard-info { padding: 28px 26px; }
+.pcard-title {
+  font-family: var(--f-d);
+  font-size: 28px;
+  letter-spacing: .03em;
+  color: var(--white);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+.pcard-price {
+  font-family: var(--f-b);
+  font-size: 13px;
+  letter-spacing: .2em;
+  color: var(--crimson);
+  text-transform: uppercase;
+}
+
+@media (max-width: 900px) { .core-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .core-grid { grid-template-columns: 1fr; } }
+</style>
+
+{% schema %}
+{
+  "name": "Core Collection",
+  "settings": [
+    { "type": "text", "id": "title", "label": "Title", "default": "CORE COLLECTION" },
+    { "type": "text", "id": "subtitle", "label": "Subtitle", "default": "Performance meets daily precision." }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Watch",
+      "settings": [
+        { "type": "product", "id": "product", "label": "Product" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Core Collection",
+      "category": "Engine Legacy",
+      "blocks": [
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" }
+      ]
+    }
+  ]
+}
+{% endschema %}

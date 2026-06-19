@@ -1,0 +1,217 @@
+<section id="s-hero" class="hero-wrap" aria-label="Hero">
+  <div class="hero-video-container">
+    {%- if section.settings.video_url != blank -%}
+      <video
+        class="hero-video-element"
+        data-hero-video
+        loop
+        muted
+        playsinline
+        autoplay
+        preload="auto"
+        {% if section.settings.poster_image != blank %}poster="{{ section.settings.poster_image | image_url: width: 1600 }}"{% endif %}>
+        <source src="{{ section.settings.video_url }}" type="video/mp4">
+      </video>
+    {%- elsif section.settings.poster_image != blank -%}
+      <img class="hero-video-element" src="{{ section.settings.poster_image | image_url: width: 1600 }}" alt="">
+    {%- else -%}
+      <div class="photo-slot" style="position:absolute; inset:0;"></div>
+    {%- endif -%}
+    <div class="hero-overlay"></div>
+  </div>
+
+  <div class="hero-interface">
+    <p class="label hero-tag sr">{{ section.settings.sub_label }}</p>
+    <h1 class="h-display hero-title sr d1">{{ section.settings.main_title | newline_to_br }}</h1>
+    <p class="body-text hero-desc sr d2">{{ section.settings.description | newline_to_br }}</p>
+
+    <div class="hero-actions-row sr d3">
+      <a href="{{ section.settings.cta_link | default: '#s-aether' }}" class="btn-primary">
+        {{ section.settings.cta_text }} <span class="btn-arrow">&rarr;</span>
+      </a>
+    </div>
+  </div>
+
+  {%- if section.settings.video_url != blank and section.settings.enable_sound -%}
+    <button type="button" class="hero-sound-toggle" data-sound-toggle aria-pressed="false" aria-label="Toggle sound">
+      <svg class="icon-sound" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <path d="M11 5 6 9H2v6h4l5 4V5z"/>
+        <path class="wave" d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14"/>
+      </svg>
+      <span data-sound-label>Sound Off</span>
+    </button>
+  {%- endif -%}
+
+  <div class="hero-indicator" aria-hidden="true">
+    <span class="indicator-text">SCROLL</span>
+    <div class="indicator-line"></div>
+  </div>
+</section>
+
+<style>
+.hero-wrap {
+  position: relative;
+  width: 100%;
+  height: 100svh;
+  min-height: 650px;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--px);
+  overflow: hidden;
+  background: var(--graphite);
+}
+.hero-video-container { position: absolute; inset: 0; z-index: 1; }
+.hero-video-element { width: 100%; height: 100%; object-fit: cover; }
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(15,17,19,.45) 0%, rgba(15,17,19,.55) 50%, rgba(15,17,19,.9) 100%);
+}
+.hero-interface {
+  position: relative;
+  z-index: 2;
+  max-width: var(--mw);
+  margin: 0 auto;
+  width: 100%;
+  margin-top: 40px;
+}
+.hero-tag { margin-bottom: 24px; }
+.hero-title { margin-bottom: 28px; font-weight: 400; }
+.hero-desc { max-width: 460px; margin-bottom: 44px; color: var(--white-dim); }
+
+/* iOS / mobile: rein in display size so long words never clip */
+@media (max-width: 600px) {
+  .hero-title { font-size: clamp(46px, 12vw, 68px); }
+}
+
+.hero-sound-toggle {
+  position: absolute;
+  bottom: calc(40px + env(safe-area-inset-bottom, 0px));
+  left: var(--px);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(15, 17, 19, .5);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-md);
+  padding: 10px 18px;
+  color: var(--white);
+  font-family: var(--f-b);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color .3s var(--ease), background .3s var(--ease);
+}
+.hero-sound-toggle:hover { border-color: var(--border-hi); }
+.hero-sound-toggle .icon-sound { width: 15px; height: 15px; }
+.hero-sound-toggle .wave { opacity: 0; transition: opacity .3s var(--ease); }
+.hero-sound-toggle.is-active { border-color: var(--crimson); }
+.hero-sound-toggle.is-active .wave { opacity: 1; }
+
+.hero-indicator {
+  position: absolute;
+  bottom: calc(40px + env(safe-area-inset-bottom, 0px));
+  right: var(--px);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.indicator-text {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: .3em;
+  color: var(--titanium);
+  writing-mode: vertical-rl;
+}
+.indicator-line {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(180deg, var(--titanium), transparent);
+  animation: indicatorPulse 2.6s ease-in-out infinite;
+}
+@keyframes indicatorPulse {
+  0%, 100% { opacity: .3; transform: scaleY(.7); }
+  50% { opacity: 1; transform: scaleY(1); }
+}
+
+@media (max-width: 600px) {
+  .hero-indicator { display: none; }
+  .hero-sound-toggle { bottom: calc(28px + env(safe-area-inset-bottom, 0px)); }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Engine Hero Video",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Background Video"
+    },
+    {
+      "type": "text",
+      "id": "video_url",
+      "label": "Video MP4 URL",
+      "info": "Upload your MP4 under Content > Files in Shopify, copy its link, and paste here. Video loops while on screen and pauses when the user scrolls away."
+    },
+    {
+      "type": "image_picker",
+      "id": "poster_image",
+      "label": "Poster / fallback image",
+      "info": "Shown before the video loads, or if no video is set."
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sound",
+      "label": "Show sound toggle button",
+      "default": true,
+      "info": "Lets visitors turn the video sound on. Sound never plays until they tap it (browser requirement), and stops automatically when they scroll past the video."
+    },
+    {
+      "type": "header",
+      "content": "Text Content"
+    },
+    {
+      "type": "text",
+      "id": "sub_label",
+      "label": "Top label",
+      "default": "Premier Engineering Timepieces"
+    },
+    {
+      "type": "textarea",
+      "id": "main_title",
+      "label": "Main title",
+      "default": "ENGINEERING\nYOU CAN WEAR."
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Premium timepieces inspired by motorsport, precision engineering and mechanical artistry."
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "Button text",
+      "default": "Explore the Collection"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Button link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Engine Hero Video",
+      "category": "Engine Legacy"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,63 @@
+<!doctype html>
+<html class="no-js" lang="{{ request.locale.iso_code }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0F1113">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <title>
+      {{ page_title }}{% if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif %}{% if current_page != 1 %} &ndash; Page {{ current_page }}{% endif %}{% unless page_title contains shop.name %} &middot; {{ shop.name }}{% endunless %}
+    </title>
+
+    {% if page_description %}
+      <meta name="description" content="{{ page_description | escape }}">
+    {% endif %}
+
+    <link rel="canonical" href="{{ canonical_url }}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    {%- comment -%}
+      Base stylesheet FIRST, then theme-variables overrides :root with
+      Customizer values. Order matters — snippet must win.
+    {%- endcomment -%}
+    {{ 'engine-legacy.css' | asset_url | stylesheet_tag }}
+    {% render 'theme-variables' %}
+
+    {{ content_for_header }}
+  </head>
+
+  <body class="template-{{ template.name }}">
+
+    {% section 'engine-header' %}
+
+    <main role="main" id="MainContent">
+      {{ content_for_layout }}
+    </main>
+
+    {% section 'footer' %}
+
+    {%- comment -%}
+      Cart drawer — rendered globally so it persists on every page and
+      any add-to-cart can open it. Exposes window.CartDrawer.
+    {%- endcomment -%}
+    {% section 'cart-drawer' %}
+
+    {%- comment -%} Expose Shopify route root for Ajax cart fetches {%- endcomment -%}
+    <script>
+      window.Shopify = window.Shopify || {};
+      window.Shopify.routes = window.Shopify.routes || {};
+      window.Shopify.routes.root = "{{ routes.root_url }}";
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+    <script src="{{ 'engine-motion.js' | asset_url }}" defer></script>
+
+  </body>
+</html>

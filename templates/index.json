@@ -1,0 +1,11 @@
+{
+  "sections": {
+    "hero": { "type": "engine-hero" },
+    "aether": { "type": "aether-flagship" },
+    "phantom": { "type": "phantom-showcase" },
+    "valkyrie": { "type": "valkyrie-showcase" },
+    "core": { "type": "core-collection" },
+    "story": { "type": "brand-story" }
+  },
+  "order": ["hero", "aether", "phantom", "valkyrie", "core", "story"]
+}

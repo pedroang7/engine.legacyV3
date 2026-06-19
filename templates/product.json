@@ -1,0 +1,15 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "spec-1": { "type": "specification", "settings": { "spec_label": "Movement", "spec_value": "Automatic" } },
+        "spec-2": { "type": "specification", "settings": { "spec_label": "Diameter", "spec_value": "42mm" } },
+        "spec-3": { "type": "specification", "settings": { "spec_label": "Water Resist.", "spec_value": "50M" } },
+        "spec-4": { "type": "specification", "settings": { "spec_label": "Case", "spec_value": "316L Steel" } }
+      },
+      "block_order": ["spec-1", "spec-2", "spec-3", "spec-4"]
+    }
+  },
+  "order": ["main"]
+}

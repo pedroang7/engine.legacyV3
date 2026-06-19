@@ -1,0 +1,89 @@
+{%- liquid
+  assign product = section.settings.product
+  if product != blank
+    assign product_title = product.title
+    assign product_url = product.url
+  else
+    assign product_title = 'Alpine Phantom'
+    assign product_url = '#'
+  endif
+-%}
+
+<section id="s-phantom" class="phantom-wrap" aria-label="{{ product_title }}">
+  <div class="phantom-info">
+    {%- if section.settings.ghost_number != blank -%}
+      <div class="phantom-ghost-num" aria-hidden="true">{{ section.settings.ghost_number }}</div>
+    {%- endif -%}
+
+    <p class="label sr" style="margin-bottom:18px">{{ section.settings.sub_label }}</p>
+
+    <h2 class="h-product phantom-name sr d1">{{ product_title }}</h2>
+
+    <p class="body-text phantom-body sr d2">
+      {{ section.settings.description | newline_to_br }}
+    </p>
+
+    {%- if product != blank -%}
+      <div class="phantom-price sr d3">{{ product.price | money_without_trailing_zeros }}</div>
+    {%- endif -%}
+
+    <div class="sr d4">
+      <a href="{{ product_url }}" class="btn-ghost">
+        Explore {{ product_title }} <span class="btn-arrow">&rarr;</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="phantom-photo sr d2">
+    {%- if product != blank and product.featured_image != blank -%}
+      <img src="{{ product.featured_image | image_url: width: 900 }}" alt="{{ product_title }}" class="phantom-product-img">
+    {%- else -%}
+      <div class="photo-slot" style="background:linear-gradient(145deg,#12161a 0%,#1c2228 50%,#12161a 100%)"></div>
+    {%- endif -%}
+  </div>
+</section>
+
+<style>
+.phantom-wrap {
+  padding: var(--section-py) var(--px);
+  max-width: calc(var(--mw) + var(--px) * 2);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(48px, 7vw, 110px);
+  align-items: center;
+  border-top: 1px solid var(--border);
+}
+.phantom-ghost-num { font-family: var(--f-d); font-size: clamp(80px, 10vw, 140px); color: rgba(243,244,246,.03); line-height: 1; margin-bottom: -12px; letter-spacing: .04em; }
+.phantom-name { margin-bottom: 28px; text-transform: uppercase; color: var(--crimson); }
+.phantom-body { max-width: 46ch; margin-bottom: 44px; }
+.phantom-price { font-family: var(--f-d); font-size: 38px; letter-spacing: .06em; color: var(--white); margin-bottom: 40px; }
+.phantom-photo { aspect-ratio: 3/4; position: relative; overflow: hidden; }
+.phantom-product-img { width: 100%; height: 100%; object-fit: cover; }
+
+@media (max-width: 1060px) {
+  .phantom-wrap { grid-template-columns: 1fr; }
+  .phantom-ghost-num { display: none; }
+  .phantom-photo { aspect-ratio: 4/3; order: -1; }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Phantom Showcase",
+  "settings": [
+    { "type": "product", "id": "product", "label": "Product (Alpine Phantom)", "info": "Price and image are pulled automatically." },
+    { "type": "text", "id": "ghost_number", "label": "Background number", "default": "II" },
+    { "type": "text", "id": "sub_label", "label": "Top label", "default": "Swiss Inspired" },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Precision crafted for those who understand that elegance is not decoration — it's the removal of everything unnecessary. The Alpine Phantom draws from the language of haute horlogerie: restraint, clarity, and an obsession with the invisible detail. Every surface serves a purpose."
+    }
+  ],
+  "presets": [
+    { "name": "Phantom Showcase", "category": "Engine Legacy" }
+  ]
+}
+{% endschema %}

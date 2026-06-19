@@ -1,0 +1,60 @@
+{% comment %}
+  ════════════════════════════════════════════════════════════
+  snippets/theme-variables.liquid — Engine Legacy™
+  ────────────────────────────────────────────────────────────
+  BONUS FILE — não pedido explicitamente, mas necessário para
+  que o item 3 (settings_schema.json) realmente funcione.
+
+  Sem isto, o Customizer salva os valores em `settings.*` mas
+  nada lê esses valores — suas CSS variables continuariam
+  hardcoded no HTML estático.
+
+  PLACEMENT: render uma vez, dentro de <head>, em theme.liquid,
+  ANTES de qualquer outro <style> ou stylesheet que use estas
+  variáveis:
+
+      {% render 'theme-variables' %}
+  ════════════════════════════════════════════════════════════
+{% endcomment %}
+
+<style>
+  :root {
+    /* ── Surfaces ── */
+    --graphite:    {{ settings.color_graphite }};
+    --graphite-2:  {{ settings.color_graphite_2 }};
+    --graphite-3:  {{ settings.color_graphite_3 }};
+
+    /* ── Text ── */
+    --white:       {{ settings.color_white }};
+    --white-dim:   rgba({{ settings.color_white | color_to_rgb | remove: 'rgb(' | remove: ')' }}, .55);
+    --titanium:    {{ settings.color_titanium }};
+    --titanium-lt: {{ settings.color_titanium_light }};
+
+    /* ── Accent ── */
+    --crimson:      {{ settings.color_crimson }};
+    --crimson-glow: rgba({{ settings.color_crimson | color_to_rgb | remove: 'rgb(' | remove: ')' }}, {{ settings.crimson_glow_opacity | divided_by: 100.0 }});
+
+    /* ── Borders (derived from white, at controlled opacities) ── */
+    --border:     rgba({{ settings.color_white | color_to_rgb | remove: 'rgb(' | remove: ')' }}, {{ settings.border_opacity | divided_by: 100.0 }});
+    --border-md:  rgba({{ settings.color_white | color_to_rgb | remove: 'rgb(' | remove: ')' }}, {{ settings.border_opacity_md | divided_by: 100.0 }});
+    --border-hi:  rgba({{ settings.color_white | color_to_rgb | remove: 'rgb(' | remove: ')' }}, {{ settings.border_opacity_hi | divided_by: 100.0 }});
+
+    /* ── Typography ── */
+    --f-d: {{ settings.font_display_family }};
+    --f-b: {{ settings.font_body_family }};
+
+    /* ── Layout ── */
+    --px:         clamp(22px, 5vw, {{ settings.section_padding_x }}px);
+    --section-py: clamp(88px, 12vh, {{ settings.section_padding_y }}px);
+    --mw:         {{ settings.container_max_width }}px;
+  }
+
+  body {
+    font-size: {{ settings.font_body_size }}px;
+  }
+
+  .h-display, .h-section, .h-product, .h-card,
+  .hero-h1, .cta-h, .aether-name, .val-name {
+    letter-spacing: {{ settings.font_display_tracking | divided_by: 100.0 }}em;
+  }
+</style>

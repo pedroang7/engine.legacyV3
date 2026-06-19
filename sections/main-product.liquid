@@ -1,0 +1,539 @@
+{% comment %}
+  ════════════════════════════════════════════════════════════
+  sections/main-product.liquid — Engine Legacy™
+  ────────────────────────────────────────────────────────────
+  PLACEMENT: templates/product.json → "main" section, type "main-product"
+
+  DEPENDENCY: This file calls window.CartDrawer.open() and
+  window.CartDrawer.updateFromSectionHTML(html). Those are
+  exposed by sections/cart-drawer.liquid. That section MUST be
+  rendered once globally in theme.liquid (outside <main>, right
+  before </body>) so it persists across the whole site.
+
+  Public contract (defined in cart-drawer.liquid):
+    window.CartDrawer.open()
+    window.CartDrawer.close()
+    window.CartDrawer.updateFromSectionHTML(htmlString)
+  ════════════════════════════════════════════════════════════
+{% endcomment %}
+
+<style>
+  .product-section{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    min-height:100svh;
+    border-top:1px solid var(--border);
+  }
+
+  /* ── Gallery ── */
+  .product-gallery{ position:relative }
+  .product-gallery-sticky{ position:sticky; top:0; height:100svh; display:flex; flex-direction:column }
+  .product-main-image{ flex:1; position:relative; overflow:hidden; background:var(--graphite-2) }
+  .product-main-image img{ width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .45s var(--ease) }
+  .product-main-image img.is-active{ opacity:1 }
+  .product-thumbs{
+    display:flex; gap:2px; padding:2px;
+    background:var(--graphite);
+  }
+  .product-thumb{
+    width:64px; height:64px; flex-shrink:0;
+    border:1px solid var(--border); cursor:pointer;
+    opacity:.5; transition:opacity .25s var(--ease), border-color .25s var(--ease);
+    background:none; padding:0; overflow:hidden;
+  }
+  .product-thumb img{ width:100%; height:100%; object-fit:cover }
+  .product-thumb.is-active,
+  .product-thumb:hover{ opacity:1; border-color:var(--border-hi) }
+
+  /* ── Info panel ── */
+  .product-info{
+    display:flex; flex-direction:column; justify-content:center;
+    padding:var(--section-py) var(--px);
+    padding-left:clamp(40px,5.5vw,96px);
+    position:relative;
+  }
+  .product-info::before{
+    content:''; position:absolute; top:0; left:0;
+    width:1px; height:100%;
+    background:linear-gradient(180deg,transparent,var(--border) 30%,var(--border) 70%,transparent);
+  }
+  .product-kicker{ display:flex; align-items:center; gap:14px; margin-bottom:28px }
+  .product-kicker::before{ content:''; display:block; width:28px; height:1px; background:var(--crimson); flex-shrink:0 }
+  .product-kicker span{ font-size:10px; letter-spacing:.42em; color:var(--titanium); text-transform:uppercase; font-family:var(--f-b) }
+
+  .product-info .h-product{ margin-bottom:24px }
+
+  .product-price{ display:flex; align-items:baseline; gap:14px; margin-bottom:36px }
+  .product-price .price-now{ font-family:var(--f-d); font-size:36px; letter-spacing:.06em; color:var(--white) }
+  .product-price .price-was{ font-family:var(--f-b); font-size:15px; color:var(--titanium); text-decoration:line-through }
+  .product-price .price-currency{ font-family:var(--f-b); font-size:10.5px; letter-spacing:.3em; color:var(--titanium); text-transform:uppercase }
+
+  .product-story{ max-width:46ch; font-size:15px; line-height:1.82; color:var(--titanium); font-weight:300; margin-bottom:44px }
+
+  /* Specs — reuses Aether's visual language for brand consistency */
+  .product-specs{ display:flex; flex-wrap:wrap; gap:32px; padding:28px 0; margin-bottom:40px; border-top:1px solid var(--border); border-bottom:1px solid var(--border) }
+  .spec-val{ font-family:var(--f-d); font-size:19px; letter-spacing:.07em; color:var(--white); margin-bottom:4px }
+  .spec-lbl{ font-size:9.5px; letter-spacing:.26em; color:var(--titanium); text-transform:uppercase; font-family:var(--f-b) }
+
+  /* Variant picker */
+  .variant-group{ margin-bottom:28px }
+  .variant-group-label{ font-size:10px; letter-spacing:.24em; color:var(--titanium); text-transform:uppercase; font-family:var(--f-b); margin-bottom:14px; display:block }
+  .variant-pills{ display:flex; flex-wrap:wrap; gap:8px }
+  .variant-pill{
+    font-family:var(--f-b); font-size:11.5px; font-weight:500;
+    color:var(--white); background:none;
+    border:1px solid var(--border-md);
+    padding:11px 22px; cursor:pointer;
+    transition:border-color .25s var(--ease), background .25s var(--ease);
+  }
+  .variant-pill:hover{ border-color:var(--border-hi) }
+  .variant-pill.is-selected{ border-color:var(--crimson); background:rgba(177,18,38,.08) }
+  .variant-pill[disabled]{ opacity:.3; cursor:not-allowed; text-decoration:line-through }
+
+  /* Quantity + Add to cart row */
+  .add-to-cart-row{ display:flex; gap:14px; align-items:stretch; margin-bottom:28px }
+  .qty-stepper{ display:flex; align-items:center; border:1px solid var(--border-md); flex-shrink:0 }
+  .qty-stepper button{
+    width:44px; height:100%; min-height:54px;
+    background:none; border:none; color:var(--white);
+    font-size:16px; cursor:pointer; transition:background .2s;
+  }
+  .qty-stepper button:hover{ background:rgba(243,244,246,.04) }
+  .qty-stepper input{
+    width:42px; height:100%; min-height:54px;
+    background:none; border:none; border-left:1px solid var(--border-md); border-right:1px solid var(--border-md);
+    color:var(--white); text-align:center; font-family:var(--f-b); font-size:13px;
+    -moz-appearance:textfield;
+  }
+  .qty-stepper input::-webkit-outer-spin-button,
+  .qty-stepper input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
+
+  .product-form .btn-primary{
+    flex:1; justify-content:center; border:1px solid var(--crimson);
+    position:relative; overflow:hidden;
+  }
+  .product-form .btn-primary.is-loading{ pointer-events:none; opacity:.7 }
+  .product-form .btn-primary[disabled]{ background:var(--graphite-3); border-color:var(--border-md); color:var(--titanium); cursor:not-allowed; box-shadow:none }
+
+  .product-form-error{
+    display:none; font-size:12.5px; color:#ff6b7a;
+    border:1px solid rgba(255,107,122,.3); background:rgba(255,107,122,.06);
+    padding:12px 16px; margin-bottom:24px; font-family:var(--f-b);
+  }
+  .product-form-error.is-visible{ display:block }
+
+  /* Trust mini-row */
+  .product-trust{ display:flex; flex-wrap:wrap; gap:20px; margin-bottom:40px }
+  .product-trust-item{ display:flex; align-items:center; gap:9px }
+  .product-trust-item .std-mark{
+    width:14px; height:14px; flex-shrink:0; border:1px solid rgba(177,18,38,.35);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .product-trust-item .std-mark::after{
+    content:''; width:6px; height:6px; background:var(--crimson);
+    clip-path:polygon(14% 44%,0 65%,50% 100%,100% 16%,80% 0%,43% 62%);
+  }
+  .product-trust-item span{ font-size:10.5px; letter-spacing:.1em; color:var(--titanium-lt); text-transform:uppercase; font-family:var(--f-b) }
+
+  /* Accordion — native <details>, zero JS overhead */
+  .product-accordion{ border-top:1px solid var(--border) }
+  .product-accordion details{ border-bottom:1px solid var(--border) }
+  .product-accordion summary{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:20px 0; cursor:pointer; list-style:none;
+    font-family:var(--f-b); font-size:12px; letter-spacing:.14em;
+    color:var(--white); text-transform:uppercase; font-weight:500;
+  }
+  .product-accordion summary::-webkit-details-marker{ display:none }
+  .product-accordion summary::after{
+    content:'+'; font-family:var(--f-b); font-size:18px; font-weight:300; color:var(--titanium);
+    transition:transform .25s var(--ease);
+  }
+  .product-accordion details[open] summary::after{ content:'−' }
+  .product-accordion-body{ padding:0 0 24px; font-size:13.5px; line-height:1.8; color:var(--titanium); font-weight:300 }
+
+  @media(max-width:1060px){
+    .product-section{ grid-template-columns:1fr }
+    .product-gallery-sticky{ position:relative; height:auto }
+    .product-main-image{ aspect-ratio:1 }
+    .product-info{ padding:64px var(--px) }
+    .product-info::before{ display:none }
+  }
+</style>
+
+<section class="product-section" id="ProductSection-{{ section.id }}">
+
+  {%- assign current_variant = product.selected_or_first_available_variant -%}
+
+  <!-- ════════ GALLERY ════════ -->
+  <div class="product-gallery">
+    <div class="product-gallery-sticky">
+      <div class="product-main-image">
+        {%- for image in product.images -%}
+          {{ image | image_url: width: 1200 | image_tag:
+              loading: 'lazy',
+              class: forloop.first ? 'is-active' : '',
+              alt: image.alt | default: product.title,
+              id: 'ProductMainImage-' | append: forloop.index
+          }}
+        {%- else -%}
+          <div class="photo-slot"></div>
+        {%- endfor -%}
+      </div>
+
+      {%- if product.images.size > 1 -%}
+      <div class="product-thumbs">
+        {%- for image in product.images -%}
+          <button type="button"
+                  class="product-thumb{% if forloop.first %} is-active{% endif %}"
+                  data-thumb-target="ProductMainImage-{{ forloop.index }}"
+                  aria-label="View image {{ forloop.index }}">
+            {{ image | image_url: width: 120 | image_tag: loading: 'lazy', alt: '' }}
+          </button>
+        {%- endfor -%}
+      </div>
+      {%- endif -%}
+    </div>
+  </div>
+
+  <!-- ════════ INFO ════════ -->
+  <div class="product-info">
+
+    <div class="product-kicker">
+      <span>{{ section.settings.kicker_text | default: 'Engine Legacy' }}</span>
+    </div>
+
+    <h1 class="h-product">{{ product.title }}</h1>
+
+    <div class="product-price">
+      <span class="price-now">{{ current_variant.price | money_without_trailing_zeros }}</span>
+      {%- if current_variant.compare_at_price > current_variant.price -%}
+        <span class="price-was">{{ current_variant.compare_at_price | money_without_trailing_zeros }}</span>
+      {%- endif -%}
+      <span class="price-currency">{{ cart.currency.iso_code }}</span>
+    </div>
+
+    <div class="product-story">
+      {%- if product.metafields.custom.story != blank -%}
+        {{ product.metafields.custom.story }}
+      {%- else -%}
+        {{ product.description | strip_html | truncatewords: 48 }}
+      {%- endif -%}
+    </div>
+
+    <!-- SPECIFICATIONS — populated via section blocks (theme editor) -->
+    {%- assign spec_blocks = section.blocks | where: 'type', 'specification' -%}
+    {%- if spec_blocks.size > 0 -%}
+    <div class="product-specs">
+      {%- for block in spec_blocks -%}
+        <div class="spec" {{ block.shopify_attributes }}>
+          <div class="spec-val">{{ block.settings.spec_value }}</div>
+          <div class="spec-lbl">{{ block.settings.spec_label }}</div>
+        </div>
+      {%- endfor -%}
+    </div>
+    {%- endif -%}
+
+    <!-- Hidden JSON: full variant data for client-side price/availability sync -->
+    <script type="application/json" data-product-variants>
+      {{ product.variants | json }}
+    </script>
+
+    {%- form 'product', product, id: 'ProductForm', class: 'product-form', data-product-form: '' -%}
+
+      <input type="hidden" name="id" value="{{ current_variant.id }}" data-variant-id-input>
+
+      <!-- VARIANT OPTIONS -->
+      {%- unless product.has_only_default_selection -%}
+        {%- for option in product.options_with_values -%}
+        <div class="variant-group">
+          <span class="variant-group-label">{{ option.name }}</span>
+          <div class="variant-pills" data-option-index="{{ forloop.index0 }}">
+            {%- for value in option.values -%}
+              <button type="button"
+                      class="variant-pill{% if value == option.selected_value %} is-selected{% endif %}"
+                      data-option-value="{{ value | escape }}">
+                {{ value }}
+              </button>
+            {%- endfor -%}
+          </div>
+        </div>
+        {%- endfor -%}
+      {%- endunless -%}
+
+      <div class="product-form-error" data-form-error></div>
+
+      <div class="add-to-cart-row">
+        <div class="qty-stepper">
+          <button type="button" data-qty-decrease aria-label="Decrease quantity">−</button>
+          <input type="number" name="quantity" value="1" min="1" data-qty-input aria-label="Quantity">
+          <button type="button" data-qty-increase aria-label="Increase quantity">+</button>
+        </div>
+
+        <button type="submit"
+                class="btn-primary"
+                data-add-to-cart-btn
+                {% unless current_variant.available %}disabled{% endunless %}>
+          <span data-btn-label>
+            {%- if current_variant.available -%}
+              {{ section.settings.cta_text | default: 'Add to Cart' }}
+            {%- else -%}
+              Sold Out
+            {%- endif -%}
+          </span>
+        </button>
+      </div>
+
+    {%- endform -%}
+
+    <!-- TRUST MINI-ROW -->
+    <div class="product-trust">
+      <div class="product-trust-item"><span class="std-mark"></span><span>Secure Checkout</span></div>
+      <div class="product-trust-item"><span class="std-mark"></span><span>Worldwide Shipping</span></div>
+      <div class="product-trust-item"><span class="std-mark"></span><span>Satisfaction Guaranteed</span></div>
+    </div>
+
+    <!-- ACCORDION — editable copy, zero JS (native <details>) -->
+    <div class="product-accordion">
+      <details>
+        <summary>{{ section.settings.details_title | default: 'Details & Craftsmanship' }}</summary>
+        <div class="product-accordion-body">
+          {{ section.settings.details_content | default: 'Precision crafted with automotive-grade materials. Every component inspected before it ever reaches your wrist.' }}
+        </div>
+      </details>
+      <details>
+        <summary>{{ section.settings.shipping_title | default: 'Shipping & Returns' }}</summary>
+        <div class="product-accordion-body">
+          {{ section.settings.shipping_content | default: 'Tracked worldwide shipping on every order. 30-day satisfaction guarantee from date of delivery.' }}
+        </div>
+      </details>
+    </div>
+
+  </div>
+</section>
+
+<script>
+(function () {
+  'use strict';
+
+  var root = document.getElementById('ProductSection-{{ section.id }}');
+  if (!root) return;
+
+  var form        = root.querySelector('[data-product-form]');
+  var addBtn      = root.querySelector('[data-add-to-cart-btn]');
+  var btnLabel    = root.querySelector('[data-btn-label]');
+  var errorBox    = root.querySelector('[data-form-error]');
+  var variantInput= root.querySelector('[data-variant-id-input]');
+  var qtyInput    = root.querySelector('[data-qty-input]');
+  var variantsRaw = root.querySelector('[data-product-variants]');
+  var variants    = variantsRaw ? JSON.parse(variantsRaw.textContent) : [];
+
+  /* ── Shopify route root (works even on multi-language / subfolder stores) ── */
+  var routeRoot = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
+
+  /* ── Gallery thumb swap ── */
+  root.querySelectorAll('.product-thumb').forEach(function (thumb) {
+    thumb.addEventListener('click', function () {
+      var targetId = thumb.getAttribute('data-thumb-target');
+      root.querySelectorAll('.product-main-image img').forEach(function (img) {
+        img.classList.toggle('is-active', img.id === targetId);
+      });
+      root.querySelectorAll('.product-thumb').forEach(function (t) { t.classList.remove('is-active'); });
+      thumb.classList.add('is-active');
+    });
+  });
+
+  /* ── Quantity stepper ── */
+  root.querySelector('[data-qty-decrease]').addEventListener('click', function () {
+    qtyInput.value = Math.max(1, (parseInt(qtyInput.value, 10) || 1) - 1);
+  });
+  root.querySelector('[data-qty-increase]').addEventListener('click', function () {
+    qtyInput.value = (parseInt(qtyInput.value, 10) || 1) + 1;
+  });
+
+  /* ── Variant selection ── */
+  var selectedOptions = {};
+  root.querySelectorAll('.variant-pills').forEach(function (group) {
+    var idx = group.getAttribute('data-option-index');
+    var selectedBtn = group.querySelector('.is-selected');
+    if (selectedBtn) selectedOptions[idx] = selectedBtn.getAttribute('data-option-value');
+
+    group.querySelectorAll('.variant-pill').forEach(function (pill) {
+      pill.addEventListener('click', function () {
+        group.querySelectorAll('.variant-pill').forEach(function (p) { p.classList.remove('is-selected'); });
+        pill.classList.add('is-selected');
+        selectedOptions[idx] = pill.getAttribute('data-option-value');
+        syncVariant();
+      });
+    });
+  });
+
+  function syncVariant() {
+    var optionValues = Object.keys(selectedOptions)
+      .sort()
+      .map(function (k) { return selectedOptions[k]; });
+
+    var match = variants.find(function (v) {
+      return v.options.every(function (opt, i) { return opt === optionValues[i]; });
+    });
+
+    if (!match) return;
+
+    variantInput.value = match.id;
+
+    var priceEl = root.querySelector('.price-now');
+    if (priceEl) priceEl.textContent = formatMoney(match.price);
+
+    var available = match.available;
+    addBtn.disabled = !available;
+    btnLabel.textContent = available
+      ? '{{ section.settings.cta_text | default: "Add to Cart" }}'
+      : 'Sold Out';
+  }
+
+  function formatMoney(cents) {
+    /* Lightweight fallback formatter. For full multi-currency support,
+       prefer Shopify.formatMoney() if money_format is exposed globally. */
+    return '$' + (cents / 100).toFixed(2);
+  }
+
+  /* ── Add to cart — Ajax, no reload, opens Cart Drawer ── */
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    errorBox.classList.remove('is-visible');
+    addBtn.classList.add('is-loading');
+    addBtn.disabled = true;
+    var originalLabel = btnLabel.textContent;
+    btnLabel.textContent = 'Adding…';
+
+    var formData = new FormData(form);
+    /* Request the cart-drawer section HTML in the SAME request —
+       avoids a second network round trip. See sections/cart-drawer.liquid */
+    formData.append('sections', 'cart-drawer');
+    formData.append('sections_url', window.location.pathname);
+
+    fetch(routeRoot + 'cart/add.js', {
+      method: 'POST',
+      body: formData,
+      headers: { Accept: 'application/json' }
+    })
+      .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+      .then(function (result) {
+        if (!result.ok) {
+          throw new Error(result.data.description || result.data.message || 'Could not add item to cart.');
+        }
+        if (window.CartDrawer) {
+          if (result.data.sections && result.data.sections['cart-drawer']) {
+            window.CartDrawer.updateFromSectionHTML(result.data.sections['cart-drawer']);
+          }
+          window.CartDrawer.open();
+        }
+      })
+      .catch(function (err) {
+        errorBox.textContent = err.message;
+        errorBox.classList.add('is-visible');
+      })
+      .finally(function () {
+        addBtn.classList.remove('is-loading');
+        addBtn.disabled = !root.querySelector('.variant-pill.is-selected, .variant-pills') ? false : addBtn.disabled;
+        btnLabel.textContent = originalLabel;
+      });
+  });
+}());
+</script>
+
+{% schema %}
+{
+  "name": "Main product",
+  "tag": "section",
+  "class": "main-product-wrapper",
+  "settings": [
+    {
+      "type": "text",
+      "id": "kicker_text",
+      "label": "Kicker label",
+      "default": "Engine Legacy"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "Add to cart button text",
+      "default": "Add to Cart"
+    },
+    {
+      "type": "header",
+      "content": "Accordion — Details"
+    },
+    {
+      "type": "text",
+      "id": "details_title",
+      "label": "Title",
+      "default": "Details & Craftsmanship"
+    },
+    {
+      "type": "richtext",
+      "id": "details_content",
+      "label": "Content"
+    },
+    {
+      "type": "header",
+      "content": "Accordion — Shipping"
+    },
+    {
+      "type": "text",
+      "id": "shipping_title",
+      "label": "Title",
+      "default": "Shipping & Returns"
+    },
+    {
+      "type": "richtext",
+      "id": "shipping_content",
+      "label": "Content"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "specification",
+      "name": "Specification",
+      "settings": [
+        {
+          "type": "text",
+          "id": "spec_label",
+          "label": "Label",
+          "default": "Movement"
+        },
+        {
+          "type": "text",
+          "id": "spec_value",
+          "label": "Value",
+          "default": "Automatic"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+{% comment %}
+  ════════════════════════════════════════════════════════════
+  EXEMPLO — templates/product.json
+  Como popular specs por produto (cada template alternativo
+  ou produto com template próprio guarda seus próprios blocks):
+  ════════════════════════════════════════════════════════════
+
+  {
+    "sections": {
+      "main": {
+        "type": "main-product",
+        "blocks": {
+          "spec-1": { "type": "specification", "settings": { "spec_label": "Movement",      "spec_value": "Automatic Skeleton" } },
+          "spec-2": { "type": "specification", "settings": { "spec_label": "Diameter",      "spec_value": "42mm" } },
+          "spec-3": { "type": "specification", "settings": { "spec_label": "Water Resist.", "spec_value": "50M" } },
+          "spec-4": { "type": "specification", "settings": { "spec_label": "Case Material", "spec_value": "316L Steel" } }
+        },
+        "block_order": ["spec-1", "spec-2", "spec-3", "spec-4"]
+      }
+    },
+    "order": ["main"]
+  }
+{% endcomment %}

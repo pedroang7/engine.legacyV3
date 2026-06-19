@@ -1,0 +1,214 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Engine Legacy",
+    "theme_version": "1.0.0",
+    "theme_author": "Engine Legacy",
+    "theme_documentation_url": "https://enginelegacy.com",
+    "theme_support_url": "https://enginelegacy.com/pages/support"
+  },
+  {
+    "name": "Brand Colors",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Primary Palette"
+      },
+      {
+        "type": "color",
+        "id": "color_graphite",
+        "label": "Graphite — Base Background",
+        "default": "#0F1113"
+      },
+      {
+        "type": "color",
+        "id": "color_graphite_2",
+        "label": "Graphite — Secondary Surface",
+        "default": "#181B1E"
+      },
+      {
+        "type": "color",
+        "id": "color_graphite_3",
+        "label": "Graphite — Tertiary Surface",
+        "default": "#1D2125"
+      },
+      {
+        "type": "header",
+        "content": "Accent"
+      },
+      {
+        "type": "color",
+        "id": "color_crimson",
+        "label": "Crimson — Accent / CTA",
+        "default": "#B11226",
+        "info": "Use sparingly, per brand guidelines — accents, CTAs, and small precision details only."
+      },
+      {
+        "type": "range",
+        "id": "crimson_glow_opacity",
+        "label": "Crimson Glow Opacity",
+        "min": 0,
+        "max": 60,
+        "step": 2,
+        "unit": "%",
+        "default": 22
+      },
+      {
+        "type": "header",
+        "content": "Text & Neutrals"
+      },
+      {
+        "type": "color",
+        "id": "color_white",
+        "label": "Primary Text — Soft White",
+        "default": "#F3F4F6"
+      },
+      {
+        "type": "color",
+        "id": "color_titanium",
+        "label": "Titanium — Secondary Text",
+        "default": "#5E646B"
+      },
+      {
+        "type": "color",
+        "id": "color_titanium_light",
+        "label": "Titanium Light — Tertiary Text",
+        "default": "#8A9099"
+      },
+      {
+        "type": "header",
+        "content": "Borders"
+      },
+      {
+        "type": "range",
+        "id": "border_opacity",
+        "label": "Border Opacity — Subtle",
+        "min": 4,
+        "max": 30,
+        "step": 1,
+        "unit": "%",
+        "default": 7
+      },
+      {
+        "type": "range",
+        "id": "border_opacity_md",
+        "label": "Border Opacity — Medium",
+        "min": 4,
+        "max": 40,
+        "step": 1,
+        "unit": "%",
+        "default": 13
+      },
+      {
+        "type": "range",
+        "id": "border_opacity_hi",
+        "label": "Border Opacity — High",
+        "min": 4,
+        "max": 50,
+        "step": 1,
+        "unit": "%",
+        "default": 22
+      }
+    ]
+  },
+  {
+    "name": "Typography",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Display Font (Headlines)"
+      },
+      {
+        "type": "text",
+        "id": "font_display_family",
+        "label": "Font family stack",
+        "default": "'Bebas Neue', sans-serif",
+        "info": "Must already be linked in theme.liquid <head> (e.g. via Google Fonts). This field only sets which already-loaded font is applied — it does not load a new font file. Shopify's built-in font_picker only exposes Shopify's own font library, not Google Fonts, which is why this is a text field instead."
+      },
+      {
+        "type": "range",
+        "id": "font_display_tracking",
+        "label": "Display letter spacing",
+        "min": 0,
+        "max": 12,
+        "step": 0.5,
+        "unit": "%",
+        "default": 3
+      },
+      {
+        "type": "header",
+        "content": "Body Font"
+      },
+      {
+        "type": "text",
+        "id": "font_body_family",
+        "label": "Font family stack",
+        "default": "'Inter', sans-serif",
+        "info": "Must already be linked in theme.liquid <head>."
+      },
+      {
+        "type": "range",
+        "id": "font_body_size",
+        "label": "Base body size",
+        "min": 13,
+        "max": 18,
+        "step": 0.5,
+        "unit": "px",
+        "default": 15
+      }
+    ]
+  },
+  {
+    "name": "Spacing & Layout",
+    "settings": [
+      {
+        "type": "range",
+        "id": "container_max_width",
+        "label": "Max content width",
+        "min": 1100,
+        "max": 1600,
+        "step": 20,
+        "unit": "px",
+        "default": 1300
+      },
+      {
+        "type": "range",
+        "id": "section_padding_y",
+        "label": "Section vertical padding",
+        "min": 60,
+        "max": 200,
+        "step": 4,
+        "unit": "px",
+        "default": 120
+      },
+      {
+        "type": "range",
+        "id": "section_padding_x",
+        "label": "Section horizontal padding",
+        "min": 16,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "default": 56
+      }
+    ]
+  },
+  {
+    "name": "Cart Drawer",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "cart_drawer_enable",
+        "label": "Enable cart drawer",
+        "default": true,
+        "info": "When off, theme code should fall back to redirecting to /cart on add-to-cart."
+      },
+      {
+        "type": "text",
+        "id": "cart_drawer_note",
+        "label": "Checkout note",
+        "default": "Shipping, taxes, and discounts calculated at checkout."
+      }
+    ]
+  }
+]

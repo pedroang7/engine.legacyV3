@@ -1,0 +1,67 @@
+{% comment %}
+  sections/main-collection.liquid — Engine Legacy™
+  Product grid for collection pages. Cards reuse the brand
+  card language (image, name, price). Links to product pages.
+{% endcomment %}
+
+<section class="collection-section">
+  <div class="collection-head">
+    <p class="label" style="margin-bottom:14px">The Collection</p>
+    <h1 class="h-section">{{ collection.title }}</h1>
+    {% if collection.description != blank %}
+      <div class="collection-desc body-text">{{ collection.description }}</div>
+    {% endif %}
+  </div>
+
+  <div class="collection-grid">
+    {% for product in collection.products %}
+      <a href="{{ product.url }}" class="ccard" aria-label="{{ product.title }}">
+        <div class="ccard-photo">
+          {% if product.featured_image %}
+            {{ product.featured_image | image_url: width: 800 | image_tag: loading: 'lazy', alt: product.title }}
+          {% else %}
+            <div class="photo-slot"></div>
+          {% endif %}
+        </div>
+        <div class="ccard-info">
+          <div class="ccard-name h-card">{{ product.title }}</div>
+          <div class="ccard-price">{{ product.price | money_without_trailing_zeros }}</div>
+        </div>
+      </a>
+    {% else %}
+      <p class="body-text">No products in this collection yet.</p>
+    {% endfor %}
+  </div>
+
+  {% if paginate.pages > 1 %}
+    <div class="collection-pagination">
+      {{ paginate | default_pagination }}
+    </div>
+  {% endif %}
+</section>
+
+<style>
+  .collection-section{ padding:calc(var(--section-py) + 60px) var(--px) var(--section-py); border-top:1px solid var(--border); max-width:calc(var(--mw) + var(--px) * 2); margin:0 auto }
+  .collection-head{ margin-bottom:60px; max-width:680px }
+  .collection-desc{ margin-top:20px }
+  .collection-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:2px }
+  .ccard{ display:block; border:1px solid var(--border); overflow:hidden; transition:border-color .4s var(--ease) }
+  .ccard:hover{ border-color:var(--border-md) }
+  .ccard-photo{ aspect-ratio:3/4; overflow:hidden; background:var(--graphite-2) }
+  .ccard-photo img,.ccard-photo .photo-slot{ width:100%; height:100%; object-fit:cover; transition:transform .65s var(--ease) }
+  .ccard:hover .ccard-photo img{ transform:scale(1.04) }
+  .ccard-info{ padding:24px 22px; display:flex; justify-content:space-between; align-items:center }
+  .ccard-price{ font-family:var(--f-d); font-size:24px; letter-spacing:.05em; color:var(--white) }
+  .collection-pagination{ display:flex; justify-content:center; gap:14px; margin-top:60px; font-family:var(--f-b); font-size:13px }
+  .collection-pagination a,.collection-pagination span{ color:var(--titanium); padding:8px 12px }
+  .collection-pagination a:hover{ color:var(--white) }
+  @media(max-width:1060px){ .collection-grid{ grid-template-columns:repeat(2,1fr) } }
+  @media(max-width:640px){ .collection-grid{ grid-template-columns:1fr } }
+</style>
+
+{% schema %}
+{
+  "name": "Collection grid",
+  "settings": []
+}
+{% endschema %}

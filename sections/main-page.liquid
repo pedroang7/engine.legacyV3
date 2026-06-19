@@ -1,0 +1,38 @@
+{% comment %}
+  sections/main-page.liquid — Engine Legacy™
+  Renders standard Shopify Pages (About, FAQ, Contact, etc.)
+  using the brand's typographic system.
+{% endcomment %}
+
+<section class="page-section">
+  <div class="page-inner">
+    {% if section.settings.show_kicker %}
+      <p class="label" style="margin-bottom:18px">{{ section.settings.kicker | default: 'Engine Legacy' }}</p>
+    {% endif %}
+    <h1 class="h-section" style="margin-bottom:48px">{{ page.title }}</h1>
+    <div class="page-rte">{{ page.content }}</div>
+  </div>
+</section>
+
+<style>
+  .page-section{ padding:calc(var(--section-py) + 60px) var(--px) var(--section-py); border-top:1px solid var(--border) }
+  .page-inner{ max-width:780px; margin:0 auto }
+  .page-rte{ font-size:16px; line-height:1.85; color:var(--titanium); font-weight:300 }
+  .page-rte h2{ font-family:var(--f-d); font-size:32px; letter-spacing:.04em; color:var(--white); margin:48px 0 18px }
+  .page-rte h3{ font-family:var(--f-d); font-size:24px; letter-spacing:.04em; color:var(--white); margin:36px 0 14px }
+  .page-rte p{ margin-bottom:22px }
+  .page-rte a{ color:var(--crimson); text-decoration:underline; text-underline-offset:3px }
+  .page-rte ul,.page-rte ol{ margin:0 0 22px 22px }
+  .page-rte li{ margin-bottom:8px }
+  .page-rte img{ width:100%; height:auto; margin:32px 0 }
+</style>
+
+{% schema %}
+{
+  "name": "Page content",
+  "settings": [
+    { "type": "checkbox", "id": "show_kicker", "label": "Show kicker label", "default": true },
+    { "type": "text", "id": "kicker", "label": "Kicker text", "default": "Engine Legacy" }
+  ]
+}
+{% endschema %}

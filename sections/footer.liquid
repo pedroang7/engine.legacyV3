@@ -1,0 +1,150 @@
+<footer id="s-footer" class="footer-wrap" aria-label="Footer">
+
+  {%- if section.blocks.size > 0 -%}
+    <div class="trust-wrap">
+      <div class="trust-grid">
+        {%- for block in section.blocks -%}
+          <div class="trust-card sr d{{ forloop.index }}" {{ block.shopify_attributes }}>
+            <div class="trust-icon">{{ block.settings.icon_text }}</div>
+            <h4 class="h-card">{{ block.settings.title }}</h4>
+            <p class="body-text">{{ block.settings.desc }}</p>
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+  {%- endif -%}
+
+  <div class="footer-main">
+    <div class="footer-main-inner">
+      <div class="footer-brand-col">
+        <div class="footer-wordmark">ENGINE LEGACY<sup>™</sup></div>
+        <p class="footer-tagline">{{ section.settings.tagline | default: 'Engineering You Can Wear' }}</p>
+      </div>
+
+      <div class="footer-links-col">
+        <div class="footer-col-title">Information</div>
+        <a href="{{ section.settings.link_1_url | default: '#' }}">{{ section.settings.link_1_text | default: 'Our Story' }}</a>
+        <a href="{{ section.settings.link_2_url | default: '#' }}">{{ section.settings.link_2_text | default: 'Shipping' }}</a>
+        <a href="{{ section.settings.link_3_url | default: '#' }}">{{ section.settings.link_3_text | default: 'Returns' }}</a>
+        <a href="{{ section.settings.link_4_url | default: '#' }}">{{ section.settings.link_4_text | default: 'Contact' }}</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <div class="footer-inner">
+      <p class="copyright">&copy; {{ 'now' | date: "%Y" }} Engine Legacy&trade;. All rights reserved.</p>
+      <nav class="footer-legal" aria-label="Legal">
+        <a href="{{ section.settings.legal_1_url | default: '#' }}">Privacy</a>
+        <a href="{{ section.settings.legal_2_url | default: '#' }}">Terms</a>
+        <a href="{{ section.settings.legal_3_url | default: '#' }}">Refunds</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+
+<style>
+.footer-wrap { background: var(--graphite-2); border-top: 1px solid var(--border); }
+
+.trust-wrap { padding: var(--section-py) var(--px); max-width: var(--mw); margin: 0 auto; }
+.trust-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px; }
+.trust-card { text-align: center; }
+.trust-icon { font-size: 24px; color: var(--crimson); margin-bottom: 22px; }
+.trust-card h4 { margin-bottom: 14px; }
+
+.footer-main { border-top: 1px solid var(--border); padding: 64px var(--px); }
+.footer-main-inner {
+  max-width: var(--mw); margin: 0 auto;
+  display: flex; justify-content: space-between;
+  gap: 48px; flex-wrap: wrap;
+}
+.footer-wordmark {
+  font-family: var(--f-d);
+  font-size: 28px;
+  letter-spacing: .24em;
+  color: var(--white);
+  text-transform: uppercase;
+  line-height: 1;
+}
+.footer-wordmark sup { font-size: .42em; vertical-align: super; }
+.footer-tagline {
+  font-family: var(--f-b);
+  font-size: 10px;
+  letter-spacing: .3em;
+  color: var(--titanium);
+  text-transform: uppercase;
+  margin-top: 14px;
+}
+.footer-links-col { display: flex; flex-direction: column; gap: 14px; }
+.footer-col-title {
+  font-size: 10.5px;
+  letter-spacing: .35em;
+  text-transform: uppercase;
+  color: var(--white);
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.footer-links-col a { font-size: 13px; color: var(--titanium); font-weight: 300; transition: color .2s; }
+.footer-links-col a:hover { color: var(--white); }
+
+.footer-bottom { padding: 32px var(--px) calc(32px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border); }
+.footer-inner {
+  max-width: var(--mw); margin: 0 auto;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 16px;
+}
+.copyright { font-size: 11px; color: var(--titanium); font-weight: 300; letter-spacing: .08em; }
+.footer-legal { display: flex; gap: 24px; }
+.footer-legal a { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--titanium); transition: color .2s; }
+.footer-legal a:hover { color: var(--white); }
+
+@media (max-width: 768px) {
+  .trust-grid { grid-template-columns: 1fr; gap: 40px; }
+  .footer-main-inner { flex-direction: column; gap: 40px; }
+  .footer-inner { flex-direction: column; align-items: flex-start; }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Footer & Trust",
+  "settings": [
+    { "type": "text", "id": "tagline", "label": "Brand tagline", "default": "Engineering You Can Wear" },
+    { "type": "header", "content": "Footer Links" },
+    { "type": "text", "id": "link_1_text", "label": "Link 1 text", "default": "Our Story" },
+    { "type": "url", "id": "link_1_url", "label": "Link 1 URL" },
+    { "type": "text", "id": "link_2_text", "label": "Link 2 text", "default": "Shipping" },
+    { "type": "url", "id": "link_2_url", "label": "Link 2 URL" },
+    { "type": "text", "id": "link_3_text", "label": "Link 3 text", "default": "Returns" },
+    { "type": "url", "id": "link_3_url", "label": "Link 3 URL" },
+    { "type": "text", "id": "link_4_text", "label": "Link 4 text", "default": "Contact" },
+    { "type": "url", "id": "link_4_url", "label": "Link 4 URL" },
+    { "type": "header", "content": "Legal Links" },
+    { "type": "url", "id": "legal_1_url", "label": "Privacy URL" },
+    { "type": "url", "id": "legal_2_url", "label": "Terms URL" },
+    { "type": "url", "id": "legal_3_url", "label": "Refunds URL" }
+  ],
+  "blocks": [
+    {
+      "type": "standard",
+      "name": "Trust Standard",
+      "limit": 3,
+      "settings": [
+        { "type": "text", "id": "icon_text", "label": "Icon / symbol", "default": "✓" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Precision Inspired" },
+        { "type": "textarea", "id": "desc", "label": "Description", "default": "Designed around engineering aesthetics and performance culture." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Footer & Trust",
+      "blocks": [
+        { "type": "standard", "settings": { "icon_text": "◆", "title": "Precision Inspired", "desc": "Designed around engineering aesthetics and performance culture." } },
+        { "type": "standard", "settings": { "icon_text": "◆", "title": "Worldwide Shipping", "desc": "Tracked, insured delivery to any address on the planet." } },
+        { "type": "standard", "settings": { "icon_text": "◆", "title": "Enthusiast Crafted", "desc": "Built by people who live performance, not just appreciate it." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,306 @@
+{% comment %}
+  ════════════════════════════════════════════════════════════
+  sections/cart-drawer.liquid — Engine Legacy™
+  ────────────────────────────────────────────────────────────
+  PLACEMENT: Render exactly ONCE, globally, in theme.liquid —
+  right before </body>, OUTSIDE <main>:
+
+      {% section 'cart-drawer' %}
+
+  This makes it persist across every page (product, collection,
+  home) without re-mounting, and lets any page open it.
+
+  ARCHITECTURE NOTE (important):
+  When Shopify's Section Rendering API returns fresh HTML for
+  this section (via the `sections` param on /cart/add.js,
+  /cart/change.js etc.), we do NOT swap the whole section —
+  we only swap the inner #CartDrawer-Content node. The outer
+  shell (overlay, header, event listeners) stays mounted, and
+  listeners are bound with event delegation on `document`, so
+  they survive content swaps without re-binding or leaking.
+
+  PUBLIC API (used by sections/main-product.liquid and any
+  other "add to cart" trigger on the site):
+    window.CartDrawer.open()
+    window.CartDrawer.close()
+    window.CartDrawer.updateFromSectionHTML(htmlString)
+  ════════════════════════════════════════════════════════════
+{% endcomment %}
+
+<style>
+  .cart-drawer{
+    position:fixed; inset:0; z-index:200;
+    visibility:hidden;
+    pointer-events:none;
+  }
+  .cart-drawer.is-open{ visibility:visible; pointer-events:auto }
+
+  .cart-drawer__overlay{
+    position:absolute; inset:0;
+    background:rgba(9,11,12,.6);
+    backdrop-filter:blur(3px);
+    opacity:0; transition:opacity .35s var(--ease);
+  }
+  .cart-drawer.is-open .cart-drawer__overlay{ opacity:1 }
+
+  .cart-drawer__panel{
+    position:absolute; top:0; right:0; bottom:0;
+    width:min(440px, 100vw);
+    background:var(--graphite);
+    border-left:1px solid var(--border-md);
+    display:flex; flex-direction:column;
+    transform:translateX(100%);
+    transition:transform .45s cubic-bezier(.16,.84,.32,1);
+  }
+  .cart-drawer.is-open .cart-drawer__panel{ transform:translateX(0) }
+
+  .cart-drawer__header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:26px var(--px);
+    border-bottom:1px solid var(--border);
+    flex-shrink:0;
+  }
+  .cart-drawer__title{
+    font-family:var(--f-d); font-size:20px; letter-spacing:.1em; color:var(--white);
+  }
+  .cart-drawer__count{
+    font-family:var(--f-b); font-size:10.5px; letter-spacing:.2em;
+    color:var(--titanium); text-transform:uppercase; margin-left:auto; margin-right:20px;
+  }
+  .cart-drawer__close{
+    background:none; border:1px solid var(--border-md);
+    width:34px; height:34px; flex-shrink:0;
+    color:var(--white); font-size:18px; line-height:1; cursor:pointer;
+    transition:border-color .2s, background .2s;
+  }
+  .cart-drawer__close:hover{ border-color:var(--border-hi); background:rgba(243,244,246,.04) }
+
+  .cart-drawer__body{
+    flex:1; overflow-y:auto; padding:8px var(--px);
+  }
+  .cart-drawer__items{ list-style:none }
+
+  .cart-item{
+    display:grid; grid-template-columns:76px 1fr auto;
+    gap:16px; padding:22px 0;
+    border-bottom:1px solid var(--border);
+    align-items:start;
+  }
+  .cart-item__image{ width:76px; height:76px; background:var(--graphite-2); overflow:hidden }
+  .cart-item__image img{ width:100%; height:100%; object-fit:cover }
+  .cart-item__title{
+    font-family:var(--f-b); font-size:13.5px; font-weight:500; color:var(--white);
+    margin-bottom:4px; line-height:1.4;
+  }
+  .cart-item__variant{
+    font-size:11.5px; color:var(--titanium); font-weight:300; margin-bottom:14px;
+  }
+  .cart-item__qty-row{ display:flex; align-items:center; gap:14px }
+  .qty-stepper--sm{ display:flex; align-items:center; border:1px solid var(--border-md) }
+  .qty-stepper--sm button{
+    width:28px; height:28px; background:none; border:none; color:var(--white);
+    font-size:13px; cursor:pointer; transition:background .2s;
+  }
+  .qty-stepper--sm button:hover{ background:rgba(243,244,246,.04) }
+  .qty-stepper--sm input{
+    width:32px; height:28px; background:none; border:none;
+    border-left:1px solid var(--border-md); border-right:1px solid var(--border-md);
+    color:var(--white); text-align:center; font-family:var(--f-b); font-size:12px;
+  }
+  .cart-item__remove{
+    background:none; border:none; color:var(--titanium);
+    font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+    text-decoration:underline; text-underline-offset:3px;
+    cursor:pointer; transition:color .2s; padding:0;
+  }
+  .cart-item__remove:hover{ color:var(--crimson) }
+  .cart-item__price{
+    font-family:var(--f-d); font-size:16px; letter-spacing:.05em; color:var(--white);
+    white-space:nowrap;
+  }
+
+  .cart-drawer__empty{
+    display:flex; flex-direction:column; align-items:flex-start; gap:24px;
+    padding:60px 0; color:var(--titanium); font-size:13.5px; font-weight:300;
+  }
+
+  .cart-drawer__footer{
+    flex-shrink:0; padding:24px var(--px) calc(24px + env(safe-area-inset-bottom));
+    border-top:1px solid var(--border);
+  }
+  .cart-drawer__subtotal-row{
+    display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;
+  }
+  .cart-drawer__subtotal-row span:first-child{
+    font-size:11px; letter-spacing:.2em; color:var(--titanium); text-transform:uppercase; font-family:var(--f-b);
+  }
+  .cart-drawer__subtotal{
+    font-family:var(--f-d); font-size:26px; letter-spacing:.05em; color:var(--white);
+  }
+  .cart-drawer__note{
+    font-size:11.5px; color:var(--titanium); font-weight:300; margin-bottom:20px; line-height:1.5;
+  }
+  .cart-drawer__checkout{ width:100%; justify-content:center; text-align:center }
+
+  @media(max-width:480px){
+    .cart-drawer__panel{ width:100vw }
+  }
+</style>
+
+<div id="CartDrawer" class="cart-drawer" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Shopping cart">
+  <div class="cart-drawer__overlay" data-cart-drawer-close></div>
+
+  <div class="cart-drawer__panel">
+    <div class="cart-drawer__header">
+      <h2 class="cart-drawer__title">Your Selection</h2>
+      <span class="cart-drawer__count" data-cart-count-label>
+        {{ cart.item_count }} item{% if cart.item_count != 1 %}s{% endif %}
+      </span>
+      <button class="cart-drawer__close" data-cart-drawer-close aria-label="Close cart">&times;</button>
+    </div>
+
+    <!-- ════ SWAPPABLE ZONE ════
+         Only this node's innerHTML gets replaced after Ajax
+         cart mutations. Everything outside it (shell + script
+         below) stays mounted and is never re-injected. -->
+    <div id="CartDrawer-Content" data-cart-drawer-content>
+      {%- render 'cart-drawer-body' -%}
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* Guard against double-init if this section is ever accidentally
+     included twice on the same page. */
+  if (window.__cartDrawerInitialized) return;
+  window.__cartDrawerInitialized = true;
+
+  var drawer     = document.getElementById('CartDrawer');
+  var contentEl  = document.getElementById('CartDrawer-Content');
+  var routeRoot  = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
+  var lastFocused = null;
+
+  /* ── Open / Close ── */
+  function openDrawer() {
+    lastFocused = document.activeElement;
+    drawer.classList.add('is-open');
+    drawer.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    var closeBtn = drawer.querySelector('.cart-drawer__close');
+    if (closeBtn) closeBtn.focus();
+  }
+
+  function closeDrawer() {
+    drawer.classList.remove('is-open');
+    drawer.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    if (lastFocused) lastFocused.focus();
+  }
+
+  /* ── Replace only the swappable content zone with fresh
+         server-rendered HTML (correct prices, currency, etc.) ── */
+  function updateFromSectionHTML(html) {
+    var doc = new DOMParser().parseFromString(html, 'text/html');
+    var fresh = doc.querySelector('#CartDrawer-Content');
+    if (fresh && contentEl) {
+      contentEl.innerHTML = fresh.innerHTML;
+    }
+    var freshCount = doc.querySelector('[data-cart-count-label]');
+    var liveCount  = document.querySelector('[data-cart-count-label]');
+    if (freshCount && liveCount) liveCount.textContent = freshCount.textContent;
+
+    /* Read the new item count from the fresh drawer markup so the header
+       bubble (and anything else listening) can update without a reload. */
+    var freshBubble = doc.querySelector('[data-cart-count-value]');
+    var count = freshBubble ? parseInt(freshBubble.getAttribute('data-cart-count-value'), 10) : null;
+
+    document.dispatchEvent(new CustomEvent('cart:count-updated', { detail: { count: count } }));
+  }
+
+  /* ── Generic /cart mutation helper (change quantity / remove) ── */
+  function changeLine(line, quantity) {
+    var formData = new FormData();
+    formData.append('line', line);
+    formData.append('quantity', quantity);
+    formData.append('sections', 'cart-drawer');
+    formData.append('sections_url', window.location.pathname);
+
+    return fetch(routeRoot + 'cart/change.js', {
+      method: 'POST',
+      body: formData,
+      headers: { Accept: 'application/json' }
+    })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data.sections && data.sections['cart-drawer']) {
+          updateFromSectionHTML(data.sections['cart-drawer']);
+        }
+      });
+  }
+
+  /* ── Event delegation — survives #CartDrawer-Content swaps
+         because listeners live on `document`, not on the nodes
+         that get replaced. ── */
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('[data-cart-drawer-close]')) {
+      e.preventDefault();
+      closeDrawer();
+      return;
+    }
+
+    var incBtn = e.target.closest('[data-qty-increase]');
+    var decBtn = e.target.closest('[data-qty-decrease]');
+    var removeBtn = e.target.closest('[data-cart-remove]');
+
+    if (incBtn && incBtn.closest('#CartDrawer-Content')) {
+      var lineInc = incBtn.getAttribute('data-line');
+      var inputInc = document.querySelector('[data-qty-input][data-line="' + lineInc + '"]');
+      var newValInc = (parseInt(inputInc.value, 10) || 0) + 1;
+      inputInc.value = newValInc;
+      changeLine(lineInc, newValInc);
+    }
+
+    if (decBtn && decBtn.closest('#CartDrawer-Content')) {
+      var lineDec = decBtn.getAttribute('data-line');
+      var inputDec = document.querySelector('[data-qty-input][data-line="' + lineDec + '"]');
+      var newValDec = Math.max(0, (parseInt(inputDec.value, 10) || 0) - 1);
+      inputDec.value = newValDec;
+      changeLine(lineDec, newValDec);
+    }
+
+    if (removeBtn && removeBtn.closest('#CartDrawer-Content')) {
+      changeLine(removeBtn.getAttribute('data-line'), 0);
+    }
+  });
+
+  document.addEventListener('change', function (e) {
+    if (e.target.matches('[data-qty-input]') && e.target.closest('#CartDrawer-Content')) {
+      var line = e.target.getAttribute('data-line');
+      var qty = Math.max(0, parseInt(e.target.value, 10) || 0);
+      changeLine(line, qty);
+    }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && drawer.classList.contains('is-open')) closeDrawer();
+  });
+
+  /* ── Public API ── */
+  window.CartDrawer = {
+    open: openDrawer,
+    close: closeDrawer,
+    updateFromSectionHTML: updateFromSectionHTML
+  };
+}());
+</script>
+
+{% schema %}
+{
+  "name": "Cart drawer",
+  "settings": []
+}
+{% endschema %}

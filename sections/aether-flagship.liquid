@@ -1,0 +1,171 @@
+{%- liquid
+  assign product = section.settings.product
+  if product != blank
+    assign product_title = product.title
+    assign product_url = product.url
+  else
+    assign product_title = 'Aether'
+    assign product_url = '#'
+  endif
+-%}
+
+<section id="s-aether" class="aether-wrap" aria-label="{{ product_title }} — The Crown Jewel">
+
+  <div class="aether-img">
+    <div class="aether-photo-sticky">
+      {%- if product != blank and product.featured_image != blank -%}
+        <img src="{{ product.featured_image | image_url: width: 1200 }}" alt="{{ product_title }}" class="aether-product-img">
+      {%- else -%}
+        <div class="photo-slot"></div>
+      {%- endif -%}
+    </div>
+  </div>
+
+  <div class="aether-info">
+    <div class="crown-badge sr">
+      <span>The Crown Jewel</span>
+    </div>
+
+    <h2 class="aether-name sr d1">{{ product_title }}</h2>
+
+    <p class="body-text aether-story sr d2">
+      {{ section.settings.story_text | newline_to_br }}
+    </p>
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="specs-row sr d3">
+        {%- for block in section.blocks -%}
+          <div class="spec" {{ block.shopify_attributes }}>
+            <div class="spec-val">{{ block.settings.value }}</div>
+            <div class="spec-lbl">{{ block.settings.label }}</div>
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- if product != blank -%}
+      <div class="aether-price sr d3">
+        {{ product.price | money_without_trailing_zeros }}
+        <span class="price-label">{{ cart.currency.iso_code }}</span>
+      </div>
+    {%- endif -%}
+
+    <div class="sr d4">
+      <a href="{{ product_url }}" class="btn-primary">
+        Acquire {{ product_title }} <span class="btn-arrow">&rarr;</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+.aether-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100svh;
+  border-top: 1px solid var(--border);
+  background: var(--graphite);
+}
+.aether-img { position: relative; min-height: 60vmin; }
+.aether-photo-sticky { position: sticky; top: 0; height: 100svh; width: 100%; }
+.aether-product-img { width: 100%; height: 100%; object-fit: cover; }
+.aether-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--section-py) var(--px);
+  padding-left: clamp(40px, 5.5vw, 96px);
+  background: var(--graphite);
+  position: relative;
+}
+.aether-info::before {
+  content: '';
+  position: absolute; top: 0; left: 0;
+  width: 1px; height: 100%;
+  background: linear-gradient(180deg, transparent, var(--border) 30%, var(--border) 70%, transparent);
+}
+.crown-badge { display: flex; align-items: center; gap: 14px; margin-bottom: 36px; }
+.crown-badge::before { content: ''; display: block; width: 28px; height: 1px; background: var(--crimson); flex-shrink: 0; }
+.crown-badge span { font-size: 10px; letter-spacing: .42em; color: var(--titanium); text-transform: uppercase; }
+
+/* CROWN JEWEL NAME — crimson, dominant */
+.aether-name {
+  font-family: var(--f-d);
+  font-size: clamp(88px, 11vw, 170px);
+  letter-spacing: .02em;
+  line-height: .82;
+  color: var(--crimson);
+  margin-bottom: 36px;
+  text-transform: uppercase;
+}
+
+.aether-story { max-width: 46ch; margin-bottom: 52px; }
+.specs-row {
+  display: flex; gap: 36px; flex-wrap: wrap;
+  padding-top: 32px; margin-bottom: 52px;
+  border-top: 1px solid var(--border);
+}
+.spec-val { font-family: var(--f-d); font-size: 20px; letter-spacing: .08em; color: var(--white); margin-bottom: 5px; }
+.spec-lbl { font-size: 9.5px; letter-spacing: .28em; color: var(--titanium); text-transform: uppercase; }
+.aether-price {
+  font-family: var(--f-d); font-size: 40px;
+  letter-spacing: .06em; color: var(--white);
+  display: flex; align-items: baseline; gap: 14px;
+  margin-bottom: 44px;
+}
+.price-label { font-family: var(--f-b); font-size: 10.5px; letter-spacing: .3em; color: var(--titanium); text-transform: uppercase; }
+
+@media (max-width: 1060px) {
+  .aether-wrap { grid-template-columns: 1fr; }
+  .aether-img { min-height: 90vw; }
+  .aether-photo-sticky { position: relative; height: 90vw; }
+  .aether-info { padding: 64px var(--px); }
+  .aether-info::before { display: none; }
+}
+@media (max-width: 600px) {
+  .aether-name { font-size: clamp(64px, 18vw, 100px); }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Aether Flagship Showcase",
+  "settings": [
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Product (Aether)",
+      "info": "Select the Aether watch. Price and main image are pulled automatically from this product."
+    },
+    {
+      "type": "textarea",
+      "id": "story_text",
+      "label": "Product story",
+      "default": "Mechanical artistry inspired by engineering perfection.\n\nSome machines aren't built to be driven. They're built to be understood. The Aether skeleton movement exposes the mechanics of timekeeping — a philosophical act disguised as a watch. Every component visible. Every revolution intentional. This is engineering you can see."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "spec",
+      "name": "Technical Specification",
+      "limit": 4,
+      "settings": [
+        { "type": "text", "id": "value", "label": "Value (e.g. SKEL, 42mm)", "default": "42mm" },
+        { "type": "text", "id": "label", "label": "Label (e.g. Diameter)", "default": "Diameter" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Aether Flagship Showcase",
+      "category": "Engine Legacy",
+      "blocks": [
+        { "type": "spec", "settings": { "value": "SKEL", "label": "Movement" } },
+        { "type": "spec", "settings": { "value": "42mm", "label": "Diameter" } },
+        { "type": "spec", "settings": { "value": "50M", "label": "Water Res." } },
+        { "type": "spec", "settings": { "value": "316L", "label": "Steel Grade" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

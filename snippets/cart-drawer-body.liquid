@@ -1,0 +1,64 @@
+{% comment %}
+  ════════════════════════════════════════════════════════════
+  snippets/cart-drawer-body.liquid — Engine Legacy™
+  ────────────────────────────────────────────────────────────
+  This is the fragment that gets swapped on every cart mutation
+  (add / change / remove). It is rendered:
+    1. Server-side on first page load via {% render %} from
+       sections/cart-drawer.liquid
+    2. Server-side again whenever Shopify's Section Rendering
+       API re-renders 'cart-drawer' after a /cart/*.js call —
+       the JS in cart-drawer.liquid extracts just this fragment
+       (#CartDrawer-Content's contents) from that response.
+
+  Keeping this as its own snippet (rather than inline) is what
+  makes the swap-target boundary unambiguous and easy to test
+  in isolation.
+  ════════════════════════════════════════════════════════════
+{% endcomment %}
+
+<span data-cart-count-value="{{ cart.item_count }}" hidden></span>
+<div class="cart-drawer__body">
+  {%- if cart.item_count > 0 -%}
+    <ul class="cart-drawer__items">
+      {%- for item in cart.items -%}
+        <li class="cart-item" data-cart-item data-line="{{ forloop.index }}">
+          <div class="cart-item__image">
+            {{ item.image | image_url: width: 200 | image_tag: loading: 'lazy', alt: item.title }}
+          </div>
+          <div>
+            <p class="cart-item__title">{{ item.product.title }}</p>
+            {%- unless item.variant.title == 'Default Title' -%}
+              <p class="cart-item__variant">{{ item.variant.title }}</p>
+            {%- endunless -%}
+            <div class="cart-item__qty-row">
+              <div class="qty-stepper--sm">
+                <button type="button" data-qty-decrease data-line="{{ forloop.index }}" aria-label="Decrease quantity">−</button>
+                <input type="number" min="0" value="{{ item.quantity }}" data-qty-input data-line="{{ forloop.index }}" aria-label="Quantity">
+                <button type="button" data-qty-increase data-line="{{ forloop.index }}" aria-label="Increase quantity">+</button>
+              </div>
+              <button class="cart-item__remove" data-cart-remove data-line="{{ forloop.index }}">Remove</button>
+            </div>
+          </div>
+          <div class="cart-item__price">{{ item.final_line_price | money }}</div>
+        </li>
+      {%- endfor -%}
+    </ul>
+  {%- else -%}
+    <div class="cart-drawer__empty">
+      <p>Your selection is currently empty.</p>
+      <a href="/collections/all" class="btn-ghost" data-cart-drawer-close>Explore the Collection →</a>
+    </div>
+  {%- endif -%}
+</div>
+
+{%- if cart.item_count > 0 -%}
+<div class="cart-drawer__footer">
+  <div class="cart-drawer__subtotal-row">
+    <span>Subtotal</span>
+    <span class="cart-drawer__subtotal">{{ cart.total_price | money }}</span>
+  </div>
+  <p class="cart-drawer__note">{{ settings.cart_drawer_note | default: 'Shipping, taxes, and discounts calculated at checkout.' }}</p>
+  <a href="{{ routes.cart_url }}" class="btn-primary cart-drawer__checkout">Proceed to Checkout →</a>
+</div>
+{%- endif -%}

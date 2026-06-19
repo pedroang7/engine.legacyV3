@@ -1,0 +1,242 @@
+<header id="engine-header" class="header-global">
+  <div class="header-inner">
+    <a href="{{ routes.root_url }}" class="header-logo" aria-label="Engine Legacy home">
+      ENGINE LEGACY<sup>™</sup>
+    </a>
+
+    <nav class="header-nav" aria-label="Main navigation">
+      {%- for link in section.settings.menu.links -%}
+        <a href="{{ link.url }}" class="nav-link">{{ link.title }}</a>
+      {%- else -%}
+        <a href="{{ routes.root_url }}" class="nav-link">Home</a>
+        <a href="#s-aether" class="nav-link">Aether</a>
+        <a href="#s-collection" class="nav-link">Collection</a>
+        <a href="#s-story" class="nav-link">Our Story</a>
+      {%- endfor -%}
+    </nav>
+
+    <div class="header-actions">
+      <button type="button" class="header-cart" data-cart-drawer-open aria-label="Open cart">
+        <svg class="icon-bag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M4 7h16v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z"/>
+          <path d="M9 7V5a3 3 0 0 1 6 0v2"/>
+        </svg>
+        <span class="cart-bubble" data-cart-bubble{% if cart.item_count == 0 %} hidden{% endif %}>{{ cart.item_count }}</span>
+      </button>
+
+      <button type="button" class="header-burger" data-mobile-menu-open aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile menu overlay -->
+  <div class="mobile-menu" data-mobile-menu aria-hidden="true">
+    <button type="button" class="mobile-menu-close" data-mobile-menu-close aria-label="Close menu">&times;</button>
+    <nav class="mobile-menu-nav">
+      {%- for link in section.settings.menu.links -%}
+        <a href="{{ link.url }}" class="mobile-nav-link" data-mobile-menu-close>{{ link.title }}</a>
+      {%- else -%}
+        <a href="{{ routes.root_url }}" class="mobile-nav-link" data-mobile-menu-close>Home</a>
+        <a href="#s-aether" class="mobile-nav-link" data-mobile-menu-close>Aether</a>
+        <a href="#s-collection" class="mobile-nav-link" data-mobile-menu-close>Collection</a>
+        <a href="#s-story" class="mobile-nav-link" data-mobile-menu-close>Our Story</a>
+      {%- endfor -%}
+    </nav>
+  </div>
+</header>
+
+<style>
+.header-global {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 900;
+  padding: 24px var(--px);
+  padding-top: calc(24px + env(safe-area-inset-top, 0px));
+  transition: background .4s var(--ease), padding .4s var(--ease), border-color .4s var(--ease);
+  border-bottom: 1px solid transparent;
+}
+.header-global.scrolled {
+  background: rgba(15, 17, 19, .92);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+  padding-top: calc(15px + env(safe-area-inset-top, 0px));
+  padding-bottom: 15px;
+  border-color: var(--border);
+}
+.header-inner {
+  max-width: var(--mw);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* IMPONENT WORDMARK — white, uppercase, heavy tracking */
+.header-logo {
+  font-family: var(--f-d);
+  font-size: clamp(22px, 2.6vw, 30px);
+  letter-spacing: .26em;
+  color: var(--white);
+  text-transform: uppercase;
+  line-height: 1;
+  white-space: nowrap;
+}
+.header-logo sup {
+  font-size: .42em;
+  letter-spacing: 0;
+  vertical-align: super;
+  margin-left: 2px;
+  color: var(--white);
+}
+
+.header-nav { display: flex; gap: 36px; }
+.nav-link {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--white-dim);
+  transition: color .3s var(--ease);
+}
+.nav-link:hover { color: var(--white); }
+
+.header-actions { display: flex; align-items: center; gap: 20px; }
+.header-cart {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: var(--white);
+  display: flex;
+}
+.icon-bag { width: 22px; height: 22px; }
+.cart-bubble {
+  position: absolute;
+  top: -4px; right: -6px;
+  min-width: 16px; height: 16px;
+  padding: 0 4px;
+  background: var(--crimson);
+  color: #fff;
+  font-family: var(--f-b);
+  font-size: 9px;
+  font-weight: 600;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.cart-bubble[hidden] { display: none; }
+
+.header-burger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 2px;
+}
+.header-burger span {
+  display: block;
+  width: 22px;
+  height: 1.5px;
+  background: var(--white);
+  transition: all .3s var(--ease);
+}
+
+/* Mobile menu overlay */
+.mobile-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  background: rgba(15, 17, 19, .98);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .4s var(--ease), visibility .4s var(--ease);
+}
+.mobile-menu.is-open { opacity: 1; visibility: visible; }
+.mobile-menu-close {
+  position: absolute;
+  top: calc(28px + env(safe-area-inset-top, 0px));
+  right: var(--px);
+  background: none;
+  border: none;
+  color: var(--white);
+  font-size: 32px;
+  line-height: 1;
+  cursor: pointer;
+}
+.mobile-menu-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+.mobile-nav-link {
+  font-family: var(--f-d);
+  font-size: 36px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--white);
+  transition: color .3s var(--ease);
+}
+.mobile-nav-link:hover { color: var(--crimson); }
+
+@media (max-width: 900px) {
+  .header-nav { display: none; }
+  .header-burger { display: flex; }
+}
+</style>
+
+<script>
+(function () {
+  var menu = document.querySelector('[data-mobile-menu]');
+  function openMenu() { if (menu) { menu.classList.add('is-open'); menu.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden'; } }
+  function closeMenu() { if (menu) { menu.classList.remove('is-open'); menu.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; } }
+
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('[data-mobile-menu-open]')) openMenu();
+    if (e.target.closest('[data-mobile-menu-close]')) closeMenu();
+    if (e.target.closest('[data-cart-drawer-open]')) {
+      if (window.CartDrawer) window.CartDrawer.open();
+    }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && menu && menu.classList.contains('is-open')) closeMenu();
+  });
+
+  /* Update the cart bubble count when the cart changes (no reload) */
+  document.addEventListener('cart:count-updated', function (e) {
+    var bubble = document.querySelector('[data-cart-bubble]');
+    if (!bubble) return;
+    var count = e.detail && typeof e.detail.count === 'number' ? e.detail.count : null;
+    if (count === null) return;
+    bubble.textContent = count;
+    if (count > 0) { bubble.removeAttribute('hidden'); }
+    else { bubble.setAttribute('hidden', ''); }
+  });
+}());
+</script>
+
+{% schema %}
+{
+  "name": "Engine Header",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Navigation menu",
+      "info": "Leave empty to use default anchor links (Home, Aether, Collection, Our Story)."
+    }
+  ]
+}
+{% endschema %}
