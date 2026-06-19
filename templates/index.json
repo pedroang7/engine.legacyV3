@@ -15,10 +15,10 @@
         "video_url": "https://cdn.shopify.com/videos/c/o/v/a33b32e15d13417796986debf3372ff7.mp4",
         "enable_sound": true,
         "sub_label": "Premier Engineering Timepieces",
-        "main_title": "ENGINEERING\nYOU CAN WEAR.",
+        "main_title": "ENGINEERING\nYOU CAN WEAR",
         "description": "Premium timepieces inspired by motorsport, precision engineering and mechanical artistry.",
         "cta_text": "Explore the Collection",
-        "cta_link": ""
+        "cta_link": "shopify://collections/all"
       }
     },
     "aether": {
