@@ -1,11 +1,96 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
-    "hero": { "type": "engine-hero" },
-    "aether": { "type": "aether-flagship" },
-    "phantom": { "type": "phantom-showcase" },
-    "valkyrie": { "type": "valkyrie-showcase" },
-    "core": { "type": "core-collection" },
-    "story": { "type": "brand-story" }
+    "hero": {
+      "type": "engine-hero",
+      "settings": {
+        "video_url": "https://cdn.shopify.com/videos/c/o/v/a33b32e15d13417796986debf3372ff7.mp4",
+        "enable_sound": true,
+        "sub_label": "Premier Engineering Timepieces",
+        "main_title": "ENGINEERING\nYOU CAN WEAR.",
+        "description": "Premium timepieces inspired by motorsport, precision engineering and mechanical artistry.",
+        "cta_text": "Explore the Collection",
+        "cta_link": ""
+      }
+    },
+    "aether": {
+      "type": "aether-flagship",
+      "settings": {
+        "product": "engine-legacy™-aether",
+        "story_text": "Mechanical artistry inspired by engineering perfection.\n\nSome machines aren't built to be driven. They're built to be understood. The Aether skeleton movement exposes the mechanics of timekeeping — a philosophical act disguised as a watch. Every component visible. Every revolution intentional. This is engineering you can see."
+      }
+    },
+    "phantom": {
+      "type": "phantom-showcase",
+      "settings": {
+        "product": "engine-legacy™-alpine-phantom",
+        "ghost_number": "II",
+        "sub_label": "Swiss Inspired",
+        "description": "Precision crafted for those who understand that elegance is not decoration — it's the removal of everything unnecessary. The Alpine Phantom draws from the language of haute horlogerie: restraint, clarity, and an obsession with the invisible detail. Every surface serves a purpose."
+      }
+    },
+    "valkyrie": {
+      "type": "valkyrie-showcase",
+      "settings": {
+        "product": "engine-legacy™-valkyrie-v12",
+        "sub_label": "Motorsport Inspired",
+        "description": "Not every machine is built for comfort. The Valkyrie V12 is built for those who push limits as a habit — inspired by the twelve-cylinder architectures that define motorsport excellence. Unapologetically mechanical. Engineered to perform."
+      }
+    },
+    "core": {
+      "type": "core-collection",
+      "blocks": {
+        "product_9P4LJL": {
+          "type": "product",
+          "settings": {
+            "product": "engine-legacy™-apex"
+          }
+        },
+        "product_JNhXFF": {
+          "type": "product",
+          "settings": {
+            "product": "engine-legacy™-redline"
+          }
+        },
+        "product_ntMPkp": {
+          "type": "product",
+          "settings": {
+            "product": "engine-legacy™-ignition"
+          }
+        }
+      },
+      "block_order": [
+        "product_9P4LJL",
+        "product_JNhXFF",
+        "product_ntMPkp"
+      ],
+      "settings": {
+        "title": "CORE COLLECTION",
+        "subtitle": "Performance meets daily precision."
+      }
+    },
+    "story": {
+      "type": "brand-story",
+      "settings": {
+        "title": "BUILT FOR PEOPLE OBSESSED WITH MACHINES.",
+        "description": "Engine Legacy is not just a brand; it's a testament to the pursuit of mechanical perfection. We exist for those who understand that true luxury isn't found in excess, but in the precision of the movement and the integrity of the design. We don't just build timepieces; we engineer legacy."
+      }
+    }
   },
-  "order": ["hero", "aether", "phantom", "valkyrie", "core", "story"]
+  "order": [
+    "hero",
+    "aether",
+    "phantom",
+    "valkyrie",
+    "core",
+    "story"
+  ]
 }
